@@ -1,0 +1,25 @@
+{
+  "protocol_sha256": "a251e4e0a6c0731489d115e95c01465e77e27f7435f080a203c7bdae27b63e65",
+  "pre_evaluation_commit": "d86f36279f2a6ca156e05c72644683397b597b4c",
+  "complete": true,
+  "evaluation_status": "Exploratory: September outcomes were already inspected before designing this hybrid.",
+  "files": {
+    "artifacts/llm/final/2026-09-01_run1_calibration.csv": "332ef9e4a05c3c270880bd6ac5d7c32e6f2525e915aa0022399d8df807024935",
+    "artifacts/llm/final/2026-09-01_run1_daily.csv": "d934d0e1531efa3e408fdd701152025cbefffbb93e996dc9cdb106c23fe3f001",
+    "artifacts/llm/final/2026-09-01_run1_hourly.csv": "d2bd747e907021c84e92e3ec597359ce7184a6332bc70934e9154523f7c7d4ef",
+    "artifacts/llm/final/2026-09-01_run1_proportions.csv": "1aac176c9208be6f46f40fc1670e6e9bd272b7c54d79c9fc97fe5fb5c0a3cc6b",
+    "artifacts/llm/final/2026-09-01_run2_calibration.csv": "106e8697de6d937cae4d1533161eca7708e841a84d7a7cd94588e61b5e1b5874",
+    "artifacts/llm/final/2026-09-01_run2_daily.csv": "8e7e3f8056b0fc1c704a036b30b0a71e0600d27282efa1899c362a5bb5c7ab16",
+    "artifacts/llm/final/2026-09-01_run2_hourly.csv": "87fa406e6b8e15a962f64bd6b9ac28681776755a45310eb768f313eef6bce117",
+    "artifacts/llm/final/2026-09-01_run2_proportions.csv": "1aac176c9208be6f46f40fc1670e6e9bd272b7c54d79c9fc97fe5fb5c0a3cc6b",
+    "artifacts/llm/final/2026-09-01_run3_calibration.csv": "79192dbaa2a2f086135d66ae5322847a7a7eaaf91ffd60ac7640dde1479a60f3",
+    "artifacts/llm/final/2026-09-01_run3_daily.csv": "e40838416a49753982081962a099837b36beb827f09c75a757f362d5f8884be6",
+    "artifacts/llm/final/2026-09-01_run3_hourly.csv": "1a6d9f4ac44ec9e0450712ffec3bd3161bfad47c57f921b0d879d50f1418d6ba",
+    "artifacts/llm/final/2026-09-01_run3_proportions.csv": "1aac176c9208be6f46f40fc1670e6e9bd272b7c54d79c9fc97fe5fb5c0a3cc6b",
+    "artifacts/llm/final/metrics.csv": "b06e5496466e5e46af50d134e906d9be1fd96592b3b9fd2b6e5df8f329437c8d",
+    "artifacts/llm/final/reliability.json": "85ba4d891a73d0c7afa1016dacc680263760fccf7b1a2ff55552a0178b0b936d",
+    "artifacts/llm/final/repeatability.json": "c9176f8a85a0e7f2134759eae91c4e90250cb2bea9ff6a22ce58b5434e45d21a"
+  },
+  "journal_bytes": 717742,
+  "journal_sha256": "8a6136903493c5ccb94ec53a32cf2507b178737dfe4e2ad897c69776f496ae53"
+}

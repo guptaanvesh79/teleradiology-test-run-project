@@ -1,0 +1,23 @@
+services:
+  api:
+    build:
+      context: .
+      target: service
+    ports:
+      - "8000:8000"
+    environment:
+      LLM_PROVIDER: "${LLM_PROVIDER:-ollama}"
+      LLM_BASE_URL: "${LLM_BASE_URL:-http://host.docker.internal:11434}"
+      LLM_MODEL: "${LLM_MODEL:-qwen3.5:4b-q4_K_M}"
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 3
+      start_period: 10s
+  tests:
+    profiles: ["test"]
+    build:
+      context: .
+      target: tests

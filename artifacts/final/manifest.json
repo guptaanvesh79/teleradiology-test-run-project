@@ -1,0 +1,8 @@
+{
+  "selection_sha256": "50dd28921a239bc198f6df342f6ec2b6b161ddcfe89eb5db8c16ce4eac5f0653",
+  "metrics_sha256": "7efdec19311f74e28cdead1c4319629038fa4a798dde976d202d911aaea4eb7f",
+  "pre_evaluation_commit": "a929ab4eb675156753dddcfbccb1f8e9fbf2fc7d",
+  "evaluated_at_utc": "2026-11-07T07:52:12.289080+00:00",
+  "selected_candidate": "quantile_filtered",
+  "policy": "September is evaluation only. No reselection or tuning."
+}

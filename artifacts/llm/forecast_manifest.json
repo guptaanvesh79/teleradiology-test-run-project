@@ -1,0 +1,14 @@
+{
+  "complete": true,
+  "protocol_sha256": "a251e4e0a6c0731489d115e95c01465e77e27f7435f080a203c7bdae27b63e65",
+  "files": {
+    "artifacts/llm/october/2026-10-01_run1_calibration.csv": "d8bd85a5f2acd43a08792a24ecef8790fdbb09680c000287ac94626c26fbbc1b",
+    "artifacts/llm/october/2026-10-01_run1_daily.csv": "7a147ac75e6835b414f14cc9ba6d3df24a37c7ec8747d7531b9f05ddaa925f3e",
+    "artifacts/llm/october/2026-10-01_run1_hourly.csv": "aaf69d02df0b1e770c4ef24de638b08f898947f31486f0af6200274eebb1b04e",
+    "artifacts/llm/october/2026-10-01_run1_proportions.csv": "a32fdf34e1447fb79484232def2d68b3c3e0c0cae7ec4f12ed357c79770b070c",
+    "artifacts/llm/october/reliability.json": "d86d664ec7d2be97708e7bc235fbf0102fbc8cffd37b8f83889091597ec4bb53",
+    "llm_forecast.csv": "aaf69d02df0b1e770c4ef24de638b08f898947f31486f0af6200274eebb1b04e"
+  },
+  "journal_bytes": 845268,
+  "journal_sha256": "f4604a47464d7fba939fe81462894ee6294ef97b63fee843c51e0f6e7b4a491e"
+}

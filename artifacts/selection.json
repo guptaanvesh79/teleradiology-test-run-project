@@ -1,0 +1,85 @@
+{
+  "selected_candidate": "quantile_filtered",
+  "specification": {
+    "features": [
+      "hour",
+      "day_of_week",
+      "is_weekend",
+      "hour_sin",
+      "hour_cos",
+      "weekday_sin",
+      "weekday_cos",
+      "days_since_start"
+    ],
+    "parameters": {
+      "max_iter": 200,
+      "learning_rate": 0.05,
+      "max_leaf_nodes": 15,
+      "min_samples_leaf": 20,
+      "l2_regularization": 1.0,
+      "random_state": 42,
+      "early_stopping": false
+    },
+    "candidates": [
+      {
+        "name": "seasonal_naive",
+        "family": "naive",
+        "exclude_sparse": false
+      },
+      {
+        "name": "poisson_raw",
+        "family": "poisson",
+        "exclude_sparse": false
+      },
+      {
+        "name": "poisson_filtered",
+        "family": "poisson",
+        "exclude_sparse": true
+      },
+      {
+        "name": "quantile_raw",
+        "family": "quantile",
+        "exclude_sparse": false
+      },
+      {
+        "name": "quantile_filtered",
+        "family": "quantile",
+        "exclude_sparse": true
+      }
+    ],
+    "sparse_day_ratio": 0.1,
+    "calibration_weeks": 3,
+    "development_origins": [
+      "2026-07-07",
+      "2026-07-21",
+      "2026-08-04"
+    ],
+    "development_days": 28,
+    "final_origin": "2026-09-01",
+    "final_days": 30,
+    "selection_rule": [
+      "mean development hourly WAPE",
+      "mean development daily WAPE",
+      "candidate order (simplicity)"
+    ]
+  },
+  "implementation_sha256": {
+    "forecasting/config.py": "5770719e7ce432ad442a69c9f96a2b2ccc9edb34522cdf2469ff7361b2d85f6e",
+    "forecasting/data.py": "76ce84887b51a2e38a8fec566a95d3526eb5d85a0c2e18758bf1ec9704333062",
+    "forecasting/features.py": "ad9f0584c1bfc796ea199c450580590767657a9769424242d4901fc1b45dd9ed",
+    "forecasting/models.py": "b675c873d10eea5868a64b11fc2919c0ca7a17c4bb0fb55443d5656227c095f8",
+    "forecasting/metrics.py": "5627e4d23ace65af46e99474e529cc757c6a00d0e7c0dec2f82d2081ba586fa6",
+    "forecasting/artifacts.py": "5f7ceb24445f7210a4dc44d9e9817f10a28a9ea573d8f044a62a65739c9735bc",
+    "forecasting/pipeline.py": "80a186faf0bfcde56dd4474c6d1121a4d01f492485cd533d668a816cf9d1bda4",
+    "requirements.txt": "fdb5a9828f9464cf5750908afeb7d4df3f38fdba729831cabd6869b9e58a2eae"
+  },
+  "data_sha256": "c6b37d674b26a84d21d3bc0c15b811196d4f40d980ea0939998fbb136bb336f5",
+  "runtime_versions": {
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "scikit-learn": "1.9.1"
+  },
+  "development_metrics_sha256": "92fde2a869bb16ddfc509ced7adfac99f30eb6572756a3a01a257382e1a71668",
+  "development_ranking_sha256": "c0a92eadd86200b1bf104dd5e1d6ed26ba90c058909c8337eaef3f98109b52fd",
+  "selection_uses_only_data_before": "2026-09-01 00:00:00"
+}

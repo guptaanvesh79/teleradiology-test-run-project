@@ -1,0 +1,7 @@
+-r requirements.txt
+
+# Permanent assignment tests, presentation, and notebook tools.
+pytest==9.2.0
+matplotlib==3.11.2
+jupyterlab==4.6.6
+ipykernel==7.4.0

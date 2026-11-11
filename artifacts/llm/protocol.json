@@ -1,0 +1,479 @@
+{
+  "version": 5,
+  "batch_days": 2,
+  "system_prompt": "Forecast daily recorded teleradiology study arrivals from synthetic history.\nUse ONLY the supplied pre-origin daily summaries and requested dates and weekdays.\nRecorded zeros and sparse days are not proven outages. Do not invent holidays,\ntimezones, hospitals, staffing or future observations. Predict each requested daily\npoint total directly; Python will allocate it to hours separately.\nReturn ONLY strict JSON: {\"days\":{\"requested-date\":nonnegative-number}}.\nUse exactly response_dates as keys, without extra fields. An initial request has\nup to two dates; retries may request only one. Copy dates exactly. Do not return\nhourly predictions, quantiles, explanations or a combined total.",
+  "schema_example": {
+    "type": "object",
+    "properties": {
+      "days": {
+        "type": "object",
+        "properties": {
+          "2026-07-07": {
+            "type": "number",
+            "minimum": 0
+          },
+          "2026-07-08": {
+            "type": "number",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "2026-07-07",
+          "2026-07-08"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "required": [
+      "days"
+    ],
+    "additionalProperties": false
+  },
+  "schema_policy": "exact requested ISO date keys; strict envelope; independent daily numeric validation",
+  "allocation": {
+    "history": "all recorded pre-origin observations; no sparse-day exclusion",
+    "proportion": "weekday/hour volume divided by total volume of that weekday",
+    "fallback": [
+      "overall hour-of-day proportions",
+      "uniform 1/24"
+    ],
+    "point": "daily LLM point total times historical hourly proportion; not an hourly median"
+  },
+  "calibration": {
+    "origin_offsets_days": [
+      21,
+      14,
+      7
+    ],
+    "window_days": 7,
+    "hourly_residual_groups": "clock hour, 21 observations each",
+    "daily_residuals": "21 whole-day errors, independent of hourly bounds",
+    "percentiles": [
+      0.1,
+      0.9
+    ],
+    "bounds": "nonnegative and containing the point; empirical, no coverage guarantee"
+  },
+  "retry_policy": {
+    "first_valid_date": true,
+    "pending_dates_only": true,
+    "maximum_calls_per_batch_invocation": 4,
+    "delays_seconds": [
+      1,
+      2,
+      4
+    ]
+  },
+  "generation": {
+    "temperature": 0.2,
+    "context_length": 16384,
+    "max_output_tokens": 8192,
+    "thinking": false,
+    "retries": 3,
+    "seed": null,
+    "keep_alive": 0
+  },
+  "provider": {
+    "provider": "ollama",
+    "base_url": "http://127.0.0.1:11434",
+    "model": "qwen3.5:4b-q4_K_M"
+  },
+  "identity": {
+    "ollama_version": "0.40.15",
+    "model": "qwen3.5:4b-q4_K_M",
+    "digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+    "details": {
+      "parent_model": "model.gguf",
+      "format": "gguf",
+      "family": "qwen35",
+      "families": [
+        "qwen35"
+      ],
+      "parameter_size": "4.2B",
+      "quantization_level": "Q4_K_M",
+      "context_length": 262144,
+      "embedding_length": 2560,
+      "runner": "llamacpp"
+    }
+  },
+  "runtime": {
+    "python": "3.13.18",
+    "numpy": "2.5.4",
+    "pandas": "3.1.1",
+    "scikit-learn": "1.9.1",
+    "httpx": "0.28.1",
+    "pydantic": "2.14.3"
+  },
+  "data_sha256": "c6b37d674b26a84d21d3bc0c15b811196d4f40d980ea0939998fbb136bb336f5",
+  "sources": {
+    "forecasting/artifacts.py": "640171c43b9b1551ec50ba90670c636a597726d1af2b6729899743b76f7ce7d1",
+    "forecasting/config.py": "e629d410e799b18de9800ea28e10f97991d9e2b5d308dfbc14f8f04ad05e3810",
+    "forecasting/data.py": "a8f82fecea837c983505899e402123f5904e491d7a972fa73085e03f6f1c81cd",
+    "forecasting/features.py": "18e633809515befa82130100bf1e6faa71a07cbf4b1a7f3cef1b3b8de5429e61",
+    "forecasting/metrics.py": "3c14ff553272c00d95ad3fda27180a03ebbb292174c2a1825d5aee1d639041b2",
+    "forecasting/models.py": "79d0221f72a4b8d08e59dc885a24e69e096f865f634386ed2aa355366d0e6648",
+    "forecasting/pipeline.py": "ecf5b9187dded324228e7a14bad7a13e0e48a4dcc486ee477ca98f6c7dbee68c",
+    "llm_forecasting/__init__.py": "ae44890ce421f7c6334f35ea7877f5ebe3b9e32db77e043b9816e33876b78264",
+    "llm_forecasting/__main__.py": "05fc8446d196b71e9804a0d592ec1b4bdd6a7d977bf60cbb7f5b1682cf4c9992",
+    "llm_forecasting/client.py": "18f3f16925a96e6df5b90803fefeeac1d128799ff731760bda5bed2a8af0278b",
+    "llm_forecasting/pipeline.py": "e188a50343ca81e994ff329f1b6c29ebff195df910fe3355104a7374cba2834a",
+    "llm_forecasting/prompts.py": "ab5e1a54fcf34aa9860d29fa27a8eab4246a6a00f05f8b9acfe1ae2e98abddc7",
+    "llm_forecasting/storage.py": "ddd487d25218fa83b129a30273ab2e4fe7fed97d6860f66f8f94687cdaae250a",
+    "requirements.txt": "fdb5a9828f9464cf5750908afeb7d4df3f38fdba729831cabd6869b9e58a2eae"
+  },
+  "baseline_files": {
+    "artifacts/daily_forecast.csv": "d48912da4edc8db84bab3f6ddda2f53e1c5838f72bf7adf870a8ddf839b0d6ec",
+    "artifacts/development/2026-07-07_poisson_filtered_daily.csv": "e600d2c0aea6d2f6433a177b92be4493f09409f705b765eef78322ac91731aff",
+    "artifacts/development/2026-07-07_poisson_filtered_hourly.csv": "3c036ed50654a4cf6fc1d88a6d11c53e0527df9ba85ea0b3b0a4e232560f2129",
+    "artifacts/development/2026-07-07_poisson_raw_daily.csv": "e600d2c0aea6d2f6433a177b92be4493f09409f705b765eef78322ac91731aff",
+    "artifacts/development/2026-07-07_poisson_raw_hourly.csv": "3c036ed50654a4cf6fc1d88a6d11c53e0527df9ba85ea0b3b0a4e232560f2129",
+    "artifacts/development/2026-07-07_quantile_filtered_daily.csv": "d6f4f38bfb3686d1c64e6b0ad871a5bc5b98b4682ffce843c9a25be96a513204",
+    "artifacts/development/2026-07-07_quantile_filtered_hourly.csv": "4f1703361d9803c871880e9fc885f206e568d2e6269bc5c1978362055a6abb40",
+    "artifacts/development/2026-07-07_quantile_raw_daily.csv": "d6f4f38bfb3686d1c64e6b0ad871a5bc5b98b4682ffce843c9a25be96a513204",
+    "artifacts/development/2026-07-07_quantile_raw_hourly.csv": "4f1703361d9803c871880e9fc885f206e568d2e6269bc5c1978362055a6abb40",
+    "artifacts/development/2026-07-07_seasonal_naive_daily.csv": "c5253dc3e8b8d0cdb05f7e1a67cd4c912794a6c8b20f53210479e5fb67d15f98",
+    "artifacts/development/2026-07-07_seasonal_naive_hourly.csv": "66890bc3e2469e8029c04d5a51c5a238cc75641a25cd18113680c2a408b3d091",
+    "artifacts/development/2026-07-21_poisson_filtered_daily.csv": "f44ecdcc56080ed3270a25355c7309400a145c68af54e83e2c68aec6d4b0b256",
+    "artifacts/development/2026-07-21_poisson_filtered_hourly.csv": "16683a9d94ad9414dfafaabf1bd294d58c7c28e0ba4c6fc8d4e9831e8d04a43d",
+    "artifacts/development/2026-07-21_poisson_raw_daily.csv": "2aaca39282e08796986c25741ca7f5c8cf167f49082c43c60f17cbab37144c22",
+    "artifacts/development/2026-07-21_poisson_raw_hourly.csv": "95e6247aca70616257839ab33f72f3c7b1801c6dffcbca262921943c973d9e73",
+    "artifacts/development/2026-07-21_quantile_filtered_daily.csv": "e86ff6255a692303d41269c43a68f15677e630f7488b9214cdaa880411a4fcc4",
+    "artifacts/development/2026-07-21_quantile_filtered_hourly.csv": "a609540ddb0ace6d1fa89d36e142577b01b1b450906b65de91b586a512a6a597",
+    "artifacts/development/2026-07-21_quantile_raw_daily.csv": "fd9610a2564d308788b386f3abfc2d7867ffcb72c4c5ff61ef93b71eed2d59b1",
+    "artifacts/development/2026-07-21_quantile_raw_hourly.csv": "4c2d6d9b86b03b4e775bba9a83c1c83e5e4eb6f6ff937b34ba385fd471aeba42",
+    "artifacts/development/2026-07-21_seasonal_naive_daily.csv": "6cddfd0ec6109de3358c1f54d09dac215934fbd9315dc2b080ba31c84580b7f2",
+    "artifacts/development/2026-07-21_seasonal_naive_hourly.csv": "87ea9930d470e807e3bf6af055e8e9a2cd06e2852cf2c8d741d8ea334b342eca",
+    "artifacts/development/2026-08-04_poisson_filtered_daily.csv": "e423bff064d4f7ae3513c94c78831563723a2d98e4a4453ad06b7dd8937ea37a",
+    "artifacts/development/2026-08-04_poisson_filtered_hourly.csv": "16ac83ba3815fcbc4ec2836603b911596f0aa428e3548fe0b190f26a31a46455",
+    "artifacts/development/2026-08-04_poisson_raw_daily.csv": "f912f741b4332024d09510bfb49e8633b6a69fb23e87aa8d957aac5535f68a98",
+    "artifacts/development/2026-08-04_poisson_raw_hourly.csv": "fa2d15750341bcf3f88b6b646087599e3058c5400d7a4c54697b7de2a00d53fc",
+    "artifacts/development/2026-08-04_quantile_filtered_daily.csv": "5fbd1dfea0f60c610aed96b48afd522872ddbb466ead9f32277478cea8a30048",
+    "artifacts/development/2026-08-04_quantile_filtered_hourly.csv": "d71948d7a57ffc4a94ca9badf131b7fd22f21d1fc209698bd5cfb83a8c069e2f",
+    "artifacts/development/2026-08-04_quantile_raw_daily.csv": "78a18d0827f16cce6bc1103db57d46835267a33fb8e250d76e3a62501e425057",
+    "artifacts/development/2026-08-04_quantile_raw_hourly.csv": "c97e651f76f70881f88414146e6a3e62cf6fbbca8bf1f2a82eb02fe83bcbc703",
+    "artifacts/development/2026-08-04_seasonal_naive_daily.csv": "02e0c40c4074bd9b1db9e9565ce7295b185f548ffb2dd0b960893fa4d63356d3",
+    "artifacts/development/2026-08-04_seasonal_naive_hourly.csv": "47f5ad90c35bdccfa4d0f1d32712886047fcdf9a63970eace44823781bd32be3",
+    "artifacts/development/data_quality.json": "239a1be07d3ca89fe2706f36afec476ef13653a8b865cc4888b343e73afbeefc",
+    "artifacts/development/metrics.csv": "92fde2a869bb16ddfc509ced7adfac99f30eb6572756a3a01a257382e1a71668",
+    "artifacts/development/ranking.csv": "c0a92eadd86200b1bf104dd5e1d6ed26ba90c058909c8337eaef3f98109b52fd",
+    "artifacts/development/training_audit_2026-07-07.csv": "d39aefb7b06bd852e8f361f57efa6ef2d644cf129bde492a85c0b03efb1c8b12",
+    "artifacts/development/training_audit_2026-07-21.csv": "85b38de9d079ede8362e9d47a5ccd3d43bf249dbd963c4a48a7ab8f0e30e5d6e",
+    "artifacts/development/training_audit_2026-08-04.csv": "49ac0dcd98f1ab99de0a44b0a997c3037dd8cb9fb5a5c4c9ae428e240268a4c2",
+    "artifacts/final/2026-09-01_poisson_filtered_daily.csv": "4d5ed7ba41bb8c3a12e2b06ab1fcf7c3042deb7910e60f5bcf664e7c9749c28b",
+    "artifacts/final/2026-09-01_poisson_filtered_hourly.csv": "3cf369bbcba9f07c7d8297356eda4195e14f29b23332e0d961c0eb82924fb8d2",
+    "artifacts/final/2026-09-01_poisson_raw_daily.csv": "84be5bd0f7c22808625a205503ae8cb95fb1e7d42829fbad700601d3c53b7a34",
+    "artifacts/final/2026-09-01_poisson_raw_hourly.csv": "e95039d179486c2f4dfef81033827261eb7d450e36aa8d652d247479a70dc411",
+    "artifacts/final/2026-09-01_quantile_filtered_daily.csv": "464f093639f7e71faad472a3fdde5768683f94c31e4581659700f42442c30fc5",
+    "artifacts/final/2026-09-01_quantile_filtered_hourly.csv": "de6d853e5ba8588446a14e5d9678d9d74d4b7776d6e734c1cdda1cf1f10d1f89",
+    "artifacts/final/2026-09-01_quantile_raw_daily.csv": "cd75797b68fb548c9c388b766983713b7247207854651906fb71c6364e398936",
+    "artifacts/final/2026-09-01_quantile_raw_hourly.csv": "1a84fccf17cafce39b91697c35ddf5ef2693a89c275ded2ebc1650aa2a3a1478",
+    "artifacts/final/2026-09-01_seasonal_naive_daily.csv": "9ff7b3c21da8409667b369c467147d2c58c0dde6f20f1c94fee56cb53131a6a7",
+    "artifacts/final/2026-09-01_seasonal_naive_hourly.csv": "3f62ff0899c3d2233672a4959f23a7816a04fe87013461166ece492f355147ba",
+    "artifacts/final/manifest.json": "16dff4adc4d79cc2a1048eb79cce9d7a76f07fa56c10dd9f668c524a8e6edc85",
+    "artifacts/final/metrics.csv": "7efdec19311f74e28cdead1c4319629038fa4a798dde976d202d911aaea4eb7f",
+    "artifacts/final/training_audit_2026-09-01.csv": "7696ab148a9f56b414d16ce31d54792f8e3d3d59bfa6fb0f83538fa6ee28da39",
+    "artifacts/final/training_audit_2026-10-01.csv": "b4c4ebceee845fecde65150415db34cf25fefd86b62abe021956afd1bb912cf8",
+    "artifacts/forecast_metadata.json": "3e1ac10e58c66a6b3cfa0011c52603270d7efc2194e4b110e966a9df358eedce",
+    "artifacts/selection.json": "50dd28921a239bc198f6df342f6ec2b6b161ddcfe89eb5db8c16ce4eac5f0653",
+    "forecast.csv": "5d917ff1034879e498ce6d4f643a016899f337ed6f6c4317cf96b41d5aef268d"
+  },
+  "development_origins": [
+    "2026-07-07",
+    "2026-07-21",
+    "2026-08-04"
+  ],
+  "development_days": 28,
+  "final_origin": "2026-09-01",
+  "final_days": 30,
+  "final_runs": 3,
+  "forecast_origin": "2026-10-01",
+  "forecast_days": 31,
+  "request_counts": {
+    "development": {
+      "main": 42,
+      "calibration": 36
+    },
+    "final": {
+      "main": 45,
+      "calibration": 36
+    },
+    "october": {
+      "main": 16,
+      "calibration": 12
+    }
+  },
+  "expected_batches": 187,
+  "maximum_attempts": 748,
+  "evaluation_status": "Exploratory: September outcomes were already inspected before designing this hybrid.",
+  "api_budget_usd": 0,
+  "coherence": "daily/hourly equality enforced by Python, not LLM arithmetic",
+  "promotion": {
+    "original_protocol": {
+      "version": 1,
+      "batch_days": 2,
+      "system_prompt": "Forecast daily recorded teleradiology study arrivals from synthetic history.\nUse ONLY the supplied pre-origin daily summaries and requested dates and weekdays.\nRecorded zeros and sparse days are not proven outages. Do not invent holidays,\ntimezones, hospitals, staffing or future observations. Predict each requested daily\npoint total directly; Python will allocate it to hours separately.\nReturn ONLY strict JSON: {\"days\":{\"requested-date\":nonnegative-number}}.\nUse exactly response_dates as keys, without extra fields. An initial request has\nup to two dates; retries may request only one. Copy dates exactly. Do not return\nhourly predictions, quantiles, explanations or a combined total.",
+      "schema_example": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "object",
+            "properties": {
+              "2026-07-07": {
+                "type": "number",
+                "minimum": 0
+              },
+              "2026-07-08": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "2026-07-07",
+              "2026-07-08"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "days"
+        ],
+        "additionalProperties": false
+      },
+      "schema_policy": "exact requested ISO date keys; strict envelope; independent daily numeric validation",
+      "allocation": {
+        "history": "all recorded pre-origin observations; no sparse-day exclusion",
+        "proportion": "weekday/hour volume divided by total volume of that weekday",
+        "fallback": [
+          "overall hour-of-day proportions",
+          "uniform 1/24"
+        ],
+        "point": "daily LLM point total times historical hourly proportion; not an hourly median"
+      },
+      "calibration": {
+        "origin_offsets_days": [
+          21,
+          14,
+          7
+        ],
+        "window_days": 7,
+        "hourly_residual_groups": "clock hour, 21 observations each",
+        "daily_residuals": "21 whole-day errors, independent of hourly bounds",
+        "percentiles": [
+          0.1,
+          0.9
+        ],
+        "bounds": "nonnegative and containing the point; empirical, no coverage guarantee"
+      },
+      "retry_policy": {
+        "first_valid_date": true,
+        "pending_dates_only": true,
+        "maximum_calls_per_batch_invocation": 4,
+        "delays_seconds": [
+          1,
+          2,
+          4
+        ]
+      },
+      "generation": {
+        "temperature": 0.2,
+        "context_length": 16384,
+        "max_output_tokens": 8192,
+        "thinking": false,
+        "retries": 3,
+        "seed": null,
+        "keep_alive": 0
+      },
+      "provider": {
+        "provider": "ollama",
+        "base_url": "http://127.0.0.1:11434",
+        "model": "qwen3.5:4b-q4_K_M"
+      },
+      "identity": {
+        "ollama_version": "0.40.15",
+        "model": "qwen3.5:4b-q4_K_M",
+        "digest": "d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04",
+        "details": {
+          "parent_model": "model.gguf",
+          "format": "gguf",
+          "family": "qwen35",
+          "families": [
+            "qwen35"
+          ],
+          "parameter_size": "4.2B",
+          "quantization_level": "Q4_K_M",
+          "context_length": 262144,
+          "embedding_length": 2560,
+          "runner": "llamacpp"
+        }
+      },
+      "runtime": {
+        "python": "3.13.18",
+        "numpy": "2.5.4",
+        "pandas": "3.1.1",
+        "scikit-learn": "1.9.1",
+        "httpx": "0.28.1",
+        "pydantic": "2.14.3"
+      },
+      "data_sha256": "c6b37d674b26a84d21d3bc0c15b811196d4f40d980ea0939998fbb136bb336f5",
+      "sources": {
+        "forecasting/artifacts.py": "640171c43b9b1551ec50ba90670c636a597726d1af2b6729899743b76f7ce7d1",
+        "forecasting/config.py": "e629d410e799b18de9800ea28e10f97991d9e2b5d308dfbc14f8f04ad05e3810",
+        "forecasting/data.py": "a8f82fecea837c983505899e402123f5904e491d7a972fa73085e03f6f1c81cd",
+        "forecasting/features.py": "18e633809515befa82130100bf1e6faa71a07cbf4b1a7f3cef1b3b8de5429e61",
+        "forecasting/metrics.py": "3c14ff553272c00d95ad3fda27180a03ebbb292174c2a1825d5aee1d639041b2",
+        "forecasting/models.py": "79d0221f72a4b8d08e59dc885a24e69e096f865f634386ed2aa355366d0e6648",
+        "forecasting/pipeline.py": "ecf5b9187dded324228e7a14bad7a13e0e48a4dcc486ee477ca98f6c7dbee68c",
+        "llm_approach2_forecasting/__init__.py": "596dc51330c31bd10c38bdf9eba9eb3bc47d39f4bb72481de5b24db875183c85",
+        "llm_approach2_forecasting/__main__.py": "86be7d1cd129bdb4937aac8f172b97222ab24ccd8b62d54f244d3797401f2160",
+        "llm_approach2_forecasting/pipeline.py": "c2378172ea79c7e21190d1cede128834a33c69d4638d99f10324cbc6a968fc11",
+        "llm_approach2_forecasting/prompts.py": "061a01e21ee8278f1fcfd4605540b39f8360bca26ed336e75304dee2144776e9",
+        "llm_forecasting/client.py": "18f3f16925a96e6df5b90803fefeeac1d128799ff731760bda5bed2a8af0278b",
+        "llm_forecasting/pipeline.py": "825d608ccd0a5632885766fe856396cbe220487d3a0f5828182eed6b3cdb78c4",
+        "llm_forecasting/prompts.py": "a729017f2a5f4100e6bb08c6cec2e9056b954dfb408944f0eb7d2f9a8baa357a",
+        "requirements.txt": "fdb5a9828f9464cf5750908afeb7d4df3f38fdba729831cabd6869b9e58a2eae"
+      },
+      "baseline_files": {
+        "artifacts/daily_forecast.csv": "d48912da4edc8db84bab3f6ddda2f53e1c5838f72bf7adf870a8ddf839b0d6ec",
+        "artifacts/development/2026-07-07_poisson_filtered_daily.csv": "e600d2c0aea6d2f6433a177b92be4493f09409f705b765eef78322ac91731aff",
+        "artifacts/development/2026-07-07_poisson_filtered_hourly.csv": "3c036ed50654a4cf6fc1d88a6d11c53e0527df9ba85ea0b3b0a4e232560f2129",
+        "artifacts/development/2026-07-07_poisson_raw_daily.csv": "e600d2c0aea6d2f6433a177b92be4493f09409f705b765eef78322ac91731aff",
+        "artifacts/development/2026-07-07_poisson_raw_hourly.csv": "3c036ed50654a4cf6fc1d88a6d11c53e0527df9ba85ea0b3b0a4e232560f2129",
+        "artifacts/development/2026-07-07_quantile_filtered_daily.csv": "d6f4f38bfb3686d1c64e6b0ad871a5bc5b98b4682ffce843c9a25be96a513204",
+        "artifacts/development/2026-07-07_quantile_filtered_hourly.csv": "4f1703361d9803c871880e9fc885f206e568d2e6269bc5c1978362055a6abb40",
+        "artifacts/development/2026-07-07_quantile_raw_daily.csv": "d6f4f38bfb3686d1c64e6b0ad871a5bc5b98b4682ffce843c9a25be96a513204",
+        "artifacts/development/2026-07-07_quantile_raw_hourly.csv": "4f1703361d9803c871880e9fc885f206e568d2e6269bc5c1978362055a6abb40",
+        "artifacts/development/2026-07-07_seasonal_naive_daily.csv": "c5253dc3e8b8d0cdb05f7e1a67cd4c912794a6c8b20f53210479e5fb67d15f98",
+        "artifacts/development/2026-07-07_seasonal_naive_hourly.csv": "66890bc3e2469e8029c04d5a51c5a238cc75641a25cd18113680c2a408b3d091",
+        "artifacts/development/2026-07-21_poisson_filtered_daily.csv": "f44ecdcc56080ed3270a25355c7309400a145c68af54e83e2c68aec6d4b0b256",
+        "artifacts/development/2026-07-21_poisson_filtered_hourly.csv": "16683a9d94ad9414dfafaabf1bd294d58c7c28e0ba4c6fc8d4e9831e8d04a43d",
+        "artifacts/development/2026-07-21_poisson_raw_daily.csv": "2aaca39282e08796986c25741ca7f5c8cf167f49082c43c60f17cbab37144c22",
+        "artifacts/development/2026-07-21_poisson_raw_hourly.csv": "95e6247aca70616257839ab33f72f3c7b1801c6dffcbca262921943c973d9e73",
+        "artifacts/development/2026-07-21_quantile_filtered_daily.csv": "e86ff6255a692303d41269c43a68f15677e630f7488b9214cdaa880411a4fcc4",
+        "artifacts/development/2026-07-21_quantile_filtered_hourly.csv": "a609540ddb0ace6d1fa89d36e142577b01b1b450906b65de91b586a512a6a597",
+        "artifacts/development/2026-07-21_quantile_raw_daily.csv": "fd9610a2564d308788b386f3abfc2d7867ffcb72c4c5ff61ef93b71eed2d59b1",
+        "artifacts/development/2026-07-21_quantile_raw_hourly.csv": "4c2d6d9b86b03b4e775bba9a83c1c83e5e4eb6f6ff937b34ba385fd471aeba42",
+        "artifacts/development/2026-07-21_seasonal_naive_daily.csv": "6cddfd0ec6109de3358c1f54d09dac215934fbd9315dc2b080ba31c84580b7f2",
+        "artifacts/development/2026-07-21_seasonal_naive_hourly.csv": "87ea9930d470e807e3bf6af055e8e9a2cd06e2852cf2c8d741d8ea334b342eca",
+        "artifacts/development/2026-08-04_poisson_filtered_daily.csv": "e423bff064d4f7ae3513c94c78831563723a2d98e4a4453ad06b7dd8937ea37a",
+        "artifacts/development/2026-08-04_poisson_filtered_hourly.csv": "16ac83ba3815fcbc4ec2836603b911596f0aa428e3548fe0b190f26a31a46455",
+        "artifacts/development/2026-08-04_poisson_raw_daily.csv": "f912f741b4332024d09510bfb49e8633b6a69fb23e87aa8d957aac5535f68a98",
+        "artifacts/development/2026-08-04_poisson_raw_hourly.csv": "fa2d15750341bcf3f88b6b646087599e3058c5400d7a4c54697b7de2a00d53fc",
+        "artifacts/development/2026-08-04_quantile_filtered_daily.csv": "5fbd1dfea0f60c610aed96b48afd522872ddbb466ead9f32277478cea8a30048",
+        "artifacts/development/2026-08-04_quantile_filtered_hourly.csv": "d71948d7a57ffc4a94ca9badf131b7fd22f21d1fc209698bd5cfb83a8c069e2f",
+        "artifacts/development/2026-08-04_quantile_raw_daily.csv": "78a18d0827f16cce6bc1103db57d46835267a33fb8e250d76e3a62501e425057",
+        "artifacts/development/2026-08-04_quantile_raw_hourly.csv": "c97e651f76f70881f88414146e6a3e62cf6fbbca8bf1f2a82eb02fe83bcbc703",
+        "artifacts/development/2026-08-04_seasonal_naive_daily.csv": "02e0c40c4074bd9b1db9e9565ce7295b185f548ffb2dd0b960893fa4d63356d3",
+        "artifacts/development/2026-08-04_seasonal_naive_hourly.csv": "47f5ad90c35bdccfa4d0f1d32712886047fcdf9a63970eace44823781bd32be3",
+        "artifacts/development/data_quality.json": "239a1be07d3ca89fe2706f36afec476ef13653a8b865cc4888b343e73afbeefc",
+        "artifacts/development/metrics.csv": "92fde2a869bb16ddfc509ced7adfac99f30eb6572756a3a01a257382e1a71668",
+        "artifacts/development/ranking.csv": "c0a92eadd86200b1bf104dd5e1d6ed26ba90c058909c8337eaef3f98109b52fd",
+        "artifacts/development/training_audit_2026-07-07.csv": "d39aefb7b06bd852e8f361f57efa6ef2d644cf129bde492a85c0b03efb1c8b12",
+        "artifacts/development/training_audit_2026-07-21.csv": "85b38de9d079ede8362e9d47a5ccd3d43bf249dbd963c4a48a7ab8f0e30e5d6e",
+        "artifacts/development/training_audit_2026-08-04.csv": "49ac0dcd98f1ab99de0a44b0a997c3037dd8cb9fb5a5c4c9ae428e240268a4c2",
+        "artifacts/final/2026-09-01_poisson_filtered_daily.csv": "4d5ed7ba41bb8c3a12e2b06ab1fcf7c3042deb7910e60f5bcf664e7c9749c28b",
+        "artifacts/final/2026-09-01_poisson_filtered_hourly.csv": "3cf369bbcba9f07c7d8297356eda4195e14f29b23332e0d961c0eb82924fb8d2",
+        "artifacts/final/2026-09-01_poisson_raw_daily.csv": "84be5bd0f7c22808625a205503ae8cb95fb1e7d42829fbad700601d3c53b7a34",
+        "artifacts/final/2026-09-01_poisson_raw_hourly.csv": "e95039d179486c2f4dfef81033827261eb7d450e36aa8d652d247479a70dc411",
+        "artifacts/final/2026-09-01_quantile_filtered_daily.csv": "464f093639f7e71faad472a3fdde5768683f94c31e4581659700f42442c30fc5",
+        "artifacts/final/2026-09-01_quantile_filtered_hourly.csv": "de6d853e5ba8588446a14e5d9678d9d74d4b7776d6e734c1cdda1cf1f10d1f89",
+        "artifacts/final/2026-09-01_quantile_raw_daily.csv": "cd75797b68fb548c9c388b766983713b7247207854651906fb71c6364e398936",
+        "artifacts/final/2026-09-01_quantile_raw_hourly.csv": "1a84fccf17cafce39b91697c35ddf5ef2693a89c275ded2ebc1650aa2a3a1478",
+        "artifacts/final/2026-09-01_seasonal_naive_daily.csv": "9ff7b3c21da8409667b369c467147d2c58c0dde6f20f1c94fee56cb53131a6a7",
+        "artifacts/final/2026-09-01_seasonal_naive_hourly.csv": "3f62ff0899c3d2233672a4959f23a7816a04fe87013461166ece492f355147ba",
+        "artifacts/final/manifest.json": "16dff4adc4d79cc2a1048eb79cce9d7a76f07fa56c10dd9f668c524a8e6edc85",
+        "artifacts/final/metrics.csv": "7efdec19311f74e28cdead1c4319629038fa4a798dde976d202d911aaea4eb7f",
+        "artifacts/final/training_audit_2026-09-01.csv": "7696ab148a9f56b414d16ce31d54792f8e3d3d59bfa6fb0f83538fa6ee28da39",
+        "artifacts/final/training_audit_2026-10-01.csv": "b4c4ebceee845fecde65150415db34cf25fefd86b62abe021956afd1bb912cf8",
+        "artifacts/forecast_metadata.json": "3e1ac10e58c66a6b3cfa0011c52603270d7efc2194e4b110e966a9df358eedce",
+        "artifacts/llm/final/2026-09-01_run1_chunks.csv": "340ff535444b0c037e098d0fafd6c7f89ab5af0955177c36f89d6429126a3dbd",
+        "artifacts/llm/final/2026-09-01_run1_daily.csv": "46c56cd9bc84348bd165e4b6a77d825eee1b7babe54af0290dc0d3bcf90e20e0",
+        "artifacts/llm/final/2026-09-01_run1_hourly.csv": "360b7cdcc18a08bfcc301265b10989ad6204a25f290fd2b25b9996edfa4fb96e",
+        "artifacts/llm/final/2026-09-01_run2_chunks.csv": "d23577caf507e4f32621b894c82ed0e82acecf0282958970f03acd343d4b9030",
+        "artifacts/llm/final/2026-09-01_run2_daily.csv": "9ef233feafe0afa9d466973ea85c25fdb41ecee6fdd8797d241dc7a90cd39a5d",
+        "artifacts/llm/final/2026-09-01_run2_hourly.csv": "a946df029a28d21f997c6cb10043b184e17d60660d8ca09171faceebb44c0abb",
+        "artifacts/llm/final/2026-09-01_run3_chunks.csv": "fe39e22edaa617f11387c0efd25e264f5487426f29c38cf5b3f1d003d72eca1c",
+        "artifacts/llm/final/2026-09-01_run3_daily.csv": "aaa2a7ad72a6697865fa9e47211ab6d5d15b9163d75d37cc06bf165aa8226067",
+        "artifacts/llm/final/2026-09-01_run3_hourly.csv": "84a204259fcdf5ce55528ab9aa37c4cd0ce4abd6889d481244b89fa2c769654f",
+        "artifacts/llm/final/manifest.json": "338cb1c5774839c12050aaea1bc7560c744462f966d58cc2c143c48fd824c078",
+        "artifacts/llm/final/metrics.csv": "cc00b17eb29bdde3928faf5c9dc6cbc81ff126fa5330a56cf8e98c630baaa24b",
+        "artifacts/llm/final/reliability.json": "4aab8a9c2275dc7d4838e1ffc89ff68e02584ce7c3bebc4bbee9e2a2eeee3703",
+        "artifacts/llm/final/repeatability.json": "59b255cd05b986ca777eca6f351f4867c573bb7f7eb9a323e80d94a69c48b75b",
+        "artifacts/llm/protocol.json": "4c7db250e803d726822f33ed17be47c8b7a70c9fb04850c5bfd4e64047e107a6",
+        "artifacts/selection.json": "50dd28921a239bc198f6df342f6ec2b6b161ddcfe89eb5db8c16ce4eac5f0653",
+        "forecast.csv": "5d917ff1034879e498ce6d4f643a016899f337ed6f6c4317cf96b41d5aef268d"
+      },
+      "development_origins": [
+        "2026-07-07",
+        "2026-07-21",
+        "2026-08-04"
+      ],
+      "development_days": 28,
+      "final_origin": "2026-09-01",
+      "final_days": 30,
+      "final_runs": 3,
+      "forecast_origin": "2026-10-01",
+      "forecast_days": 31,
+      "request_counts": {
+        "development": {
+          "main": 42,
+          "calibration": 36
+        },
+        "final": {
+          "main": 45,
+          "calibration": 36
+        },
+        "october": {
+          "main": 16,
+          "calibration": 12
+        }
+      },
+      "expected_batches": 187,
+      "maximum_attempts": 748,
+      "evaluation_status": "Exploratory: September outcomes were already inspected before designing this hybrid.",
+      "api_budget_usd": 0,
+      "coherence": "daily/hourly equality enforced by Python, not LLM arithmetic",
+      "experiment_sha256": "e179255ba740b725e659adff4f85318467ec561270b7a2ccce5e028db6edbd62",
+      "development_files": {
+        "artifacts/llm-approach2/development/2026-07-07_run1_calibration.csv": "313c274877eb3fb9a23b4ad0636a2c0c0c791bed77e471b7d0a494ced42afd48",
+        "artifacts/llm-approach2/development/2026-07-07_run1_daily.csv": "b8c1a397543088211aaf3f4e87264b5e52fa20932f9f94c96e6a85e5d449a9f1",
+        "artifacts/llm-approach2/development/2026-07-07_run1_hourly.csv": "82988609b987db6db8e4c30002dc72b8093ae8e7917c9e824a5f908c39c088b3",
+        "artifacts/llm-approach2/development/2026-07-07_run1_proportions.csv": "d5bf1b7386c6bbbf51fef6847674d299ef1962a2bdf3d586b4cb090ae5b4bc74",
+        "artifacts/llm-approach2/development/2026-07-21_run1_calibration.csv": "23c09b71c0fcfc151cceb641dece2a10eeca0f490d3d9d9f41bee893083a56fb",
+        "artifacts/llm-approach2/development/2026-07-21_run1_daily.csv": "9f6a124e14a821ab91d10d7436d9914963276804d7040c4a29254b6656a27a47",
+        "artifacts/llm-approach2/development/2026-07-21_run1_hourly.csv": "f1179d4428d0c230c31ff31a2db10ac18d4c4a0a209c5032d8a2f7344e0eb690",
+        "artifacts/llm-approach2/development/2026-07-21_run1_proportions.csv": "dd32fd221db0ae2d59f27a8430cf8783b9e797e9400b24aed4ba1502e51abce6",
+        "artifacts/llm-approach2/development/2026-08-04_run1_calibration.csv": "679311cd400cc3b35d8dc61e8429d80bbff02072444bdd36c536f1e1a584861e",
+        "artifacts/llm-approach2/development/2026-08-04_run1_daily.csv": "615ff15428a60c5f98821190957ef1713fe2374b26d1ef1aaf2b3a89e514062a",
+        "artifacts/llm-approach2/development/2026-08-04_run1_hourly.csv": "223a3c7efc214d77676d74d3341011e67009e276294952815f56f5827608a027",
+        "artifacts/llm-approach2/development/2026-08-04_run1_proportions.csv": "4d608fa746ca2e4f4e9b5c5023bdb2283101d4ce7717602d38058d2aa03335bd",
+        "artifacts/llm-approach2/development/metrics.csv": "2c826400fb47f3f8e853c8b5e4818de2ebcfd333d9ca401fc1237e6e47b802da",
+        "artifacts/llm-approach2/development/reliability.json": "fa957d5aa2aeaaacc34999aaa5803154de40d2e0e6775d17280b6ac8123f8f64"
+      },
+      "journal_bytes": 348962,
+      "journal_sha256": "acf64dd0f340548cec3141f9b01e9cbd7d11f06d1a6f62e455e4d02a5d8b326e"
+    },
+    "original_protocol_text": "{\n  \"version\": 1,\n  \"batch_days\": 2,\n  \"system_prompt\": \"Forecast daily recorded teleradiology study arrivals from synthetic history.\\nUse ONLY the supplied pre-origin daily summaries and requested dates and weekdays.\\nRecorded zeros and sparse days are not proven outages. Do not invent holidays,\\ntimezones, hospitals, staffing or future observations. Predict each requested daily\\npoint total directly; Python will allocate it to hours separately.\\nReturn ONLY strict JSON: {\\\"days\\\":{\\\"requested-date\\\":nonnegative-number}}.\\nUse exactly response_dates as keys, without extra fields. An initial request has\\nup to two dates; retries may request only one. Copy dates exactly. Do not return\\nhourly predictions, quantiles, explanations or a combined total.\",\n  \"schema_example\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"days\": {\n        \"type\": \"object\",\n        \"properties\": {\n          \"2026-07-07\": {\n            \"type\": \"number\",\n            \"minimum\": 0\n          },\n          \"2026-07-08\": {\n            \"type\": \"number\",\n            \"minimum\": 0\n          }\n        },\n        \"required\": [\n          \"2026-07-07\",\n          \"2026-07-08\"\n        ],\n        \"additionalProperties\": false\n      }\n    },\n    \"required\": [\n      \"days\"\n    ],\n    \"additionalProperties\": false\n  },\n  \"schema_policy\": \"exact requested ISO date keys; strict envelope; independent daily numeric validation\",\n  \"allocation\": {\n    \"history\": \"all recorded pre-origin observations; no sparse-day exclusion\",\n    \"proportion\": \"weekday/hour volume divided by total volume of that weekday\",\n    \"fallback\": [\n      \"overall hour-of-day proportions\",\n      \"uniform 1/24\"\n    ],\n    \"point\": \"daily LLM point total times historical hourly proportion; not an hourly median\"\n  },\n  \"calibration\": {\n    \"origin_offsets_days\": [\n      21,\n      14,\n      7\n    ],\n    \"window_days\": 7,\n    \"hourly_residual_groups\": \"clock hour, 21 observations each\",\n    \"daily_residuals\": \"21 whole-day errors, independent of hourly bounds\",\n    \"percentiles\": [\n      0.1,\n      0.9\n    ],\n    \"bounds\": \"nonnegative and containing the point; empirical, no coverage guarantee\"\n  },\n  \"retry_policy\": {\n    \"first_valid_date\": true,\n    \"pending_dates_only\": true,\n    \"maximum_calls_per_batch_invocation\": 4,\n    \"delays_seconds\": [\n      1,\n      2,\n      4\n    ]\n  },\n  \"generation\": {\n    \"temperature\": 0.2,\n    \"context_length\": 16384,\n    \"max_output_tokens\": 8192,\n    \"thinking\": false,\n    \"retries\": 3,\n    \"seed\": null,\n    \"keep_alive\": 0\n  },\n  \"provider\": {\n    \"provider\": \"ollama\",\n    \"base_url\": \"http://127.0.0.1:11434\",\n    \"model\": \"qwen3.5:4b-q4_K_M\"\n  },\n  \"identity\": {\n    \"ollama_version\": \"0.40.15\",\n    \"model\": \"qwen3.5:4b-q4_K_M\",\n    \"digest\": \"d8b0f5e9760cd1682034f292d7ef72ec46f432149be0df7574bf2d6e92e38c04\",\n    \"details\": {\n      \"parent_model\": \"model.gguf\",\n      \"format\": \"gguf\",\n      \"family\": \"qwen35\",\n      \"families\": [\n        \"qwen35\"\n      ],\n      \"parameter_size\": \"4.2B\",\n      \"quantization_level\": \"Q4_K_M\",\n      \"context_length\": 262144,\n      \"embedding_length\": 2560,\n      \"runner\": \"llamacpp\"\n    }\n  },\n  \"runtime\": {\n    \"python\": \"3.13.18\",\n    \"numpy\": \"2.5.4\",\n    \"pandas\": \"3.1.1\",\n    \"scikit-learn\": \"1.9.1\",\n    \"httpx\": \"0.28.1\",\n    \"pydantic\": \"2.14.3\"\n  },\n  \"data_sha256\": \"c6b37d674b26a84d21d3bc0c15b811196d4f40d980ea0939998fbb136bb336f5\",\n  \"sources\": {\n    \"forecasting/artifacts.py\": \"640171c43b9b1551ec50ba90670c636a597726d1af2b6729899743b76f7ce7d1\",\n    \"forecasting/config.py\": \"e629d410e799b18de9800ea28e10f97991d9e2b5d308dfbc14f8f04ad05e3810\",\n    \"forecasting/data.py\": \"a8f82fecea837c983505899e402123f5904e491d7a972fa73085e03f6f1c81cd\",\n    \"forecasting/features.py\": \"18e633809515befa82130100bf1e6faa71a07cbf4b1a7f3cef1b3b8de5429e61\",\n    \"forecasting/metrics.py\": \"3c14ff553272c00d95ad3fda27180a03ebbb292174c2a1825d5aee1d639041b2\",\n    \"forecasting/models.py\": \"79d0221f72a4b8d08e59dc885a24e69e096f865f634386ed2aa355366d0e6648\",\n    \"forecasting/pipeline.py\": \"ecf5b9187dded324228e7a14bad7a13e0e48a4dcc486ee477ca98f6c7dbee68c\",\n    \"llm_approach2_forecasting/__init__.py\": \"596dc51330c31bd10c38bdf9eba9eb3bc47d39f4bb72481de5b24db875183c85\",\n    \"llm_approach2_forecasting/__main__.py\": \"86be7d1cd129bdb4937aac8f172b97222ab24ccd8b62d54f244d3797401f2160\",\n    \"llm_approach2_forecasting/pipeline.py\": \"c2378172ea79c7e21190d1cede128834a33c69d4638d99f10324cbc6a968fc11\",\n    \"llm_approach2_forecasting/prompts.py\": \"061a01e21ee8278f1fcfd4605540b39f8360bca26ed336e75304dee2144776e9\",\n    \"llm_forecasting/client.py\": \"18f3f16925a96e6df5b90803fefeeac1d128799ff731760bda5bed2a8af0278b\",\n    \"llm_forecasting/pipeline.py\": \"825d608ccd0a5632885766fe856396cbe220487d3a0f5828182eed6b3cdb78c4\",\n    \"llm_forecasting/prompts.py\": \"a729017f2a5f4100e6bb08c6cec2e9056b954dfb408944f0eb7d2f9a8baa357a\",\n    \"requirements.txt\": \"fdb5a9828f9464cf5750908afeb7d4df3f38fdba729831cabd6869b9e58a2eae\"\n  },\n  \"baseline_files\": {\n    \"artifacts/daily_forecast.csv\": \"d48912da4edc8db84bab3f6ddda2f53e1c5838f72bf7adf870a8ddf839b0d6ec\",\n    \"artifacts/development/2026-07-07_poisson_filtered_daily.csv\": \"e600d2c0aea6d2f6433a177b92be4493f09409f705b765eef78322ac91731aff\",\n    \"artifacts/development/2026-07-07_poisson_filtered_hourly.csv\": \"3c036ed50654a4cf6fc1d88a6d11c53e0527df9ba85ea0b3b0a4e232560f2129\",\n    \"artifacts/development/2026-07-07_poisson_raw_daily.csv\": \"e600d2c0aea6d2f6433a177b92be4493f09409f705b765eef78322ac91731aff\",\n    \"artifacts/development/2026-07-07_poisson_raw_hourly.csv\": \"3c036ed50654a4cf6fc1d88a6d11c53e0527df9ba85ea0b3b0a4e232560f2129\",\n    \"artifacts/development/2026-07-07_quantile_filtered_daily.csv\": \"d6f4f38bfb3686d1c64e6b0ad871a5bc5b98b4682ffce843c9a25be96a513204\",\n    \"artifacts/development/2026-07-07_quantile_filtered_hourly.csv\": \"4f1703361d9803c871880e9fc885f206e568d2e6269bc5c1978362055a6abb40\",\n    \"artifacts/development/2026-07-07_quantile_raw_daily.csv\": \"d6f4f38bfb3686d1c64e6b0ad871a5bc5b98b4682ffce843c9a25be96a513204\",\n    \"artifacts/development/2026-07-07_quantile_raw_hourly.csv\": \"4f1703361d9803c871880e9fc885f206e568d2e6269bc5c1978362055a6abb40\",\n    \"artifacts/development/2026-07-07_seasonal_naive_daily.csv\": \"c5253dc3e8b8d0cdb05f7e1a67cd4c912794a6c8b20f53210479e5fb67d15f98\",\n    \"artifacts/development/2026-07-07_seasonal_naive_hourly.csv\": \"66890bc3e2469e8029c04d5a51c5a238cc75641a25cd18113680c2a408b3d091\",\n    \"artifacts/development/2026-07-21_poisson_filtered_daily.csv\": \"f44ecdcc56080ed3270a25355c7309400a145c68af54e83e2c68aec6d4b0b256\",\n    \"artifacts/development/2026-07-21_poisson_filtered_hourly.csv\": \"16683a9d94ad9414dfafaabf1bd294d58c7c28e0ba4c6fc8d4e9831e8d04a43d\",\n    \"artifacts/development/2026-07-21_poisson_raw_daily.csv\": \"2aaca39282e08796986c25741ca7f5c8cf167f49082c43c60f17cbab37144c22\",\n    \"artifacts/development/2026-07-21_poisson_raw_hourly.csv\": \"95e6247aca70616257839ab33f72f3c7b1801c6dffcbca262921943c973d9e73\",\n    \"artifacts/development/2026-07-21_quantile_filtered_daily.csv\": \"e86ff6255a692303d41269c43a68f15677e630f7488b9214cdaa880411a4fcc4\",\n    \"artifacts/development/2026-07-21_quantile_filtered_hourly.csv\": \"a609540ddb0ace6d1fa89d36e142577b01b1b450906b65de91b586a512a6a597\",\n    \"artifacts/development/2026-07-21_quantile_raw_daily.csv\": \"fd9610a2564d308788b386f3abfc2d7867ffcb72c4c5ff61ef93b71eed2d59b1\",\n    \"artifacts/development/2026-07-21_quantile_raw_hourly.csv\": \"4c2d6d9b86b03b4e775bba9a83c1c83e5e4eb6f6ff937b34ba385fd471aeba42\",\n    \"artifacts/development/2026-07-21_seasonal_naive_daily.csv\": \"6cddfd0ec6109de3358c1f54d09dac215934fbd9315dc2b080ba31c84580b7f2\",\n    \"artifacts/development/2026-07-21_seasonal_naive_hourly.csv\": \"87ea9930d470e807e3bf6af055e8e9a2cd06e2852cf2c8d741d8ea334b342eca\",\n    \"artifacts/development/2026-08-04_poisson_filtered_daily.csv\": \"e423bff064d4f7ae3513c94c78831563723a2d98e4a4453ad06b7dd8937ea37a\",\n    \"artifacts/development/2026-08-04_poisson_filtered_hourly.csv\": \"16ac83ba3815fcbc4ec2836603b911596f0aa428e3548fe0b190f26a31a46455\",\n    \"artifacts/development/2026-08-04_poisson_raw_daily.csv\": \"f912f741b4332024d09510bfb49e8633b6a69fb23e87aa8d957aac5535f68a98\",\n    \"artifacts/development/2026-08-04_poisson_raw_hourly.csv\": \"fa2d15750341bcf3f88b6b646087599e3058c5400d7a4c54697b7de2a00d53fc\",\n    \"artifacts/development/2026-08-04_quantile_filtered_daily.csv\": \"5fbd1dfea0f60c610aed96b48afd522872ddbb466ead9f32277478cea8a30048\",\n    \"artifacts/development/2026-08-04_quantile_filtered_hourly.csv\": \"d71948d7a57ffc4a94ca9badf131b7fd22f21d1fc209698bd5cfb83a8c069e2f\",\n    \"artifacts/development/2026-08-04_quantile_raw_daily.csv\": \"78a18d0827f16cce6bc1103db57d46835267a33fb8e250d76e3a62501e425057\",\n    \"artifacts/development/2026-08-04_quantile_raw_hourly.csv\": \"c97e651f76f70881f88414146e6a3e62cf6fbbca8bf1f2a82eb02fe83bcbc703\",\n    \"artifacts/development/2026-08-04_seasonal_naive_daily.csv\": \"02e0c40c4074bd9b1db9e9565ce7295b185f548ffb2dd0b960893fa4d63356d3\",\n    \"artifacts/development/2026-08-04_seasonal_naive_hourly.csv\": \"47f5ad90c35bdccfa4d0f1d32712886047fcdf9a63970eace44823781bd32be3\",\n    \"artifacts/development/data_quality.json\": \"239a1be07d3ca89fe2706f36afec476ef13653a8b865cc4888b343e73afbeefc\",\n    \"artifacts/development/metrics.csv\": \"92fde2a869bb16ddfc509ced7adfac99f30eb6572756a3a01a257382e1a71668\",\n    \"artifacts/development/ranking.csv\": \"c0a92eadd86200b1bf104dd5e1d6ed26ba90c058909c8337eaef3f98109b52fd\",\n    \"artifacts/development/training_audit_2026-07-07.csv\": \"d39aefb7b06bd852e8f361f57efa6ef2d644cf129bde492a85c0b03efb1c8b12\",\n    \"artifacts/development/training_audit_2026-07-21.csv\": \"85b38de9d079ede8362e9d47a5ccd3d43bf249dbd963c4a48a7ab8f0e30e5d6e\",\n    \"artifacts/development/training_audit_2026-08-04.csv\": \"49ac0dcd98f1ab99de0a44b0a997c3037dd8cb9fb5a5c4c9ae428e240268a4c2\",\n    \"artifacts/final/2026-09-01_poisson_filtered_daily.csv\": \"4d5ed7ba41bb8c3a12e2b06ab1fcf7c3042deb7910e60f5bcf664e7c9749c28b\",\n    \"artifacts/final/2026-09-01_poisson_filtered_hourly.csv\": \"3cf369bbcba9f07c7d8297356eda4195e14f29b23332e0d961c0eb82924fb8d2\",\n    \"artifacts/final/2026-09-01_poisson_raw_daily.csv\": \"84be5bd0f7c22808625a205503ae8cb95fb1e7d42829fbad700601d3c53b7a34\",\n    \"artifacts/final/2026-09-01_poisson_raw_hourly.csv\": \"e95039d179486c2f4dfef81033827261eb7d450e36aa8d652d247479a70dc411\",\n    \"artifacts/final/2026-09-01_quantile_filtered_daily.csv\": \"464f093639f7e71faad472a3fdde5768683f94c31e4581659700f42442c30fc5\",\n    \"artifacts/final/2026-09-01_quantile_filtered_hourly.csv\": \"de6d853e5ba8588446a14e5d9678d9d74d4b7776d6e734c1cdda1cf1f10d1f89\",\n    \"artifacts/final/2026-09-01_quantile_raw_daily.csv\": \"cd75797b68fb548c9c388b766983713b7247207854651906fb71c6364e398936\",\n    \"artifacts/final/2026-09-01_quantile_raw_hourly.csv\": \"1a84fccf17cafce39b91697c35ddf5ef2693a89c275ded2ebc1650aa2a3a1478\",\n    \"artifacts/final/2026-09-01_seasonal_naive_daily.csv\": \"9ff7b3c21da8409667b369c467147d2c58c0dde6f20f1c94fee56cb53131a6a7\",\n    \"artifacts/final/2026-09-01_seasonal_naive_hourly.csv\": \"3f62ff0899c3d2233672a4959f23a7816a04fe87013461166ece492f355147ba\",\n    \"artifacts/final/manifest.json\": \"16dff4adc4d79cc2a1048eb79cce9d7a76f07fa56c10dd9f668c524a8e6edc85\",\n    \"artifacts/final/metrics.csv\": \"7efdec19311f74e28cdead1c4319629038fa4a798dde976d202d911aaea4eb7f\",\n    \"artifacts/final/training_audit_2026-09-01.csv\": \"7696ab148a9f56b414d16ce31d54792f8e3d3d59bfa6fb0f83538fa6ee28da39\",\n    \"artifacts/final/training_audit_2026-10-01.csv\": \"b4c4ebceee845fecde65150415db34cf25fefd86b62abe021956afd1bb912cf8\",\n    \"artifacts/forecast_metadata.json\": \"3e1ac10e58c66a6b3cfa0011c52603270d7efc2194e4b110e966a9df358eedce\",\n    \"artifacts/llm/final/2026-09-01_run1_chunks.csv\": \"340ff535444b0c037e098d0fafd6c7f89ab5af0955177c36f89d6429126a3dbd\",\n    \"artifacts/llm/final/2026-09-01_run1_daily.csv\": \"46c56cd9bc84348bd165e4b6a77d825eee1b7babe54af0290dc0d3bcf90e20e0\",\n    \"artifacts/llm/final/2026-09-01_run1_hourly.csv\": \"360b7cdcc18a08bfcc301265b10989ad6204a25f290fd2b25b9996edfa4fb96e\",\n    \"artifacts/llm/final/2026-09-01_run2_chunks.csv\": \"d23577caf507e4f32621b894c82ed0e82acecf0282958970f03acd343d4b9030\",\n    \"artifacts/llm/final/2026-09-01_run2_daily.csv\": \"9ef233feafe0afa9d466973ea85c25fdb41ecee6fdd8797d241dc7a90cd39a5d\",\n    \"artifacts/llm/final/2026-09-01_run2_hourly.csv\": \"a946df029a28d21f997c6cb10043b184e17d60660d8ca09171faceebb44c0abb\",\n    \"artifacts/llm/final/2026-09-01_run3_chunks.csv\": \"fe39e22edaa617f11387c0efd25e264f5487426f29c38cf5b3f1d003d72eca1c\",\n    \"artifacts/llm/final/2026-09-01_run3_daily.csv\": \"aaa2a7ad72a6697865fa9e47211ab6d5d15b9163d75d37cc06bf165aa8226067\",\n    \"artifacts/llm/final/2026-09-01_run3_hourly.csv\": \"84a204259fcdf5ce55528ab9aa37c4cd0ce4abd6889d481244b89fa2c769654f\",\n    \"artifacts/llm/final/manifest.json\": \"338cb1c5774839c12050aaea1bc7560c744462f966d58cc2c143c48fd824c078\",\n    \"artifacts/llm/final/metrics.csv\": \"cc00b17eb29bdde3928faf5c9dc6cbc81ff126fa5330a56cf8e98c630baaa24b\",\n    \"artifacts/llm/final/reliability.json\": \"4aab8a9c2275dc7d4838e1ffc89ff68e02584ce7c3bebc4bbee9e2a2eeee3703\",\n    \"artifacts/llm/final/repeatability.json\": \"59b255cd05b986ca777eca6f351f4867c573bb7f7eb9a323e80d94a69c48b75b\",\n    \"artifacts/llm/protocol.json\": \"4c7db250e803d726822f33ed17be47c8b7a70c9fb04850c5bfd4e64047e107a6\",\n    \"artifacts/selection.json\": \"50dd28921a239bc198f6df342f6ec2b6b161ddcfe89eb5db8c16ce4eac5f0653\",\n    \"forecast.csv\": \"5d917ff1034879e498ce6d4f643a016899f337ed6f6c4317cf96b41d5aef268d\"\n  },\n  \"development_origins\": [\n    \"2026-07-07\",\n    \"2026-07-21\",\n    \"2026-08-04\"\n  ],\n  \"development_days\": 28,\n  \"final_origin\": \"2026-09-01\",\n  \"final_days\": 30,\n  \"final_runs\": 3,\n  \"forecast_origin\": \"2026-10-01\",\n  \"forecast_days\": 31,\n  \"request_counts\": {\n    \"development\": {\n      \"main\": 42,\n      \"calibration\": 36\n    },\n    \"final\": {\n      \"main\": 45,\n      \"calibration\": 36\n    },\n    \"october\": {\n      \"main\": 16,\n      \"calibration\": 12\n    }\n  },\n  \"expected_batches\": 187,\n  \"maximum_attempts\": 748,\n  \"evaluation_status\": \"Exploratory: September outcomes were already inspected before designing this hybrid.\",\n  \"api_budget_usd\": 0,\n  \"coherence\": \"daily/hourly equality enforced by Python, not LLM arithmetic\",\n  \"experiment_sha256\": \"e179255ba740b725e659adff4f85318467ec561270b7a2ccce5e028db6edbd62\",\n  \"development_files\": {\n    \"artifacts/llm-approach2/development/2026-07-07_run1_calibration.csv\": \"313c274877eb3fb9a23b4ad0636a2c0c0c791bed77e471b7d0a494ced42afd48\",\n    \"artifacts/llm-approach2/development/2026-07-07_run1_daily.csv\": \"b8c1a397543088211aaf3f4e87264b5e52fa20932f9f94c96e6a85e5d449a9f1\",\n    \"artifacts/llm-approach2/development/2026-07-07_run1_hourly.csv\": \"82988609b987db6db8e4c30002dc72b8093ae8e7917c9e824a5f908c39c088b3\",\n    \"artifacts/llm-approach2/development/2026-07-07_run1_proportions.csv\": \"d5bf1b7386c6bbbf51fef6847674d299ef1962a2bdf3d586b4cb090ae5b4bc74\",\n    \"artifacts/llm-approach2/development/2026-07-21_run1_calibration.csv\": \"23c09b71c0fcfc151cceb641dece2a10eeca0f490d3d9d9f41bee893083a56fb\",\n    \"artifacts/llm-approach2/development/2026-07-21_run1_daily.csv\": \"9f6a124e14a821ab91d10d7436d9914963276804d7040c4a29254b6656a27a47\",\n    \"artifacts/llm-approach2/development/2026-07-21_run1_hourly.csv\": \"f1179d4428d0c230c31ff31a2db10ac18d4c4a0a209c5032d8a2f7344e0eb690\",\n    \"artifacts/llm-approach2/development/2026-07-21_run1_proportions.csv\": \"dd32fd221db0ae2d59f27a8430cf8783b9e797e9400b24aed4ba1502e51abce6\",\n    \"artifacts/llm-approach2/development/2026-08-04_run1_calibration.csv\": \"679311cd400cc3b35d8dc61e8429d80bbff02072444bdd36c536f1e1a584861e\",\n    \"artifacts/llm-approach2/development/2026-08-04_run1_daily.csv\": \"615ff15428a60c5f98821190957ef1713fe2374b26d1ef1aaf2b3a89e514062a\",\n    \"artifacts/llm-approach2/development/2026-08-04_run1_hourly.csv\": \"223a3c7efc214d77676d74d3341011e67009e276294952815f56f5827608a027\",\n    \"artifacts/llm-approach2/development/2026-08-04_run1_proportions.csv\": \"4d608fa746ca2e4f4e9b5c5023bdb2283101d4ce7717602d38058d2aa03335bd\",\n    \"artifacts/llm-approach2/development/metrics.csv\": \"2c826400fb47f3f8e853c8b5e4818de2ebcfd333d9ca401fc1237e6e47b802da\",\n    \"artifacts/llm-approach2/development/reliability.json\": \"fa957d5aa2aeaaacc34999aaa5803154de40d2e0e6775d17280b6ac8123f8f64\"\n  },\n  \"journal_bytes\": 348962,\n  \"journal_sha256\": \"acf64dd0f340548cec3141f9b01e9cbd7d11f06d1a6f62e455e4d02a5d8b326e\"\n}\n",
+    "original_protocol_sha256": "c1fdc6282b7f077411e500e601d3f447118ebd952c84367683f50cf0999393df",
+    "reason": "Promoted unchanged daily-volume allocation method into canonical LLM paths; superseded direct results deleted at user request.",
+    "validation": "Replayed all pre-origin requests without inference; retained hourly/daily forecasts match saved values within 1e-9. Development CSV and journal bytes unchanged."
+  },
+  "experiment_sha256": "fb1c14f7beac9988b887b307cca513ae34fe688437339cf0603942f2a84adb7e",
+  "development_files": {
+    "artifacts/llm/development/2026-07-07_run1_calibration.csv": "313c274877eb3fb9a23b4ad0636a2c0c0c791bed77e471b7d0a494ced42afd48",
+    "artifacts/llm/development/2026-07-07_run1_daily.csv": "b8c1a397543088211aaf3f4e87264b5e52fa20932f9f94c96e6a85e5d449a9f1",
+    "artifacts/llm/development/2026-07-07_run1_hourly.csv": "82988609b987db6db8e4c30002dc72b8093ae8e7917c9e824a5f908c39c088b3",
+    "artifacts/llm/development/2026-07-07_run1_proportions.csv": "d5bf1b7386c6bbbf51fef6847674d299ef1962a2bdf3d586b4cb090ae5b4bc74",
+    "artifacts/llm/development/2026-07-21_run1_calibration.csv": "23c09b71c0fcfc151cceb641dece2a10eeca0f490d3d9d9f41bee893083a56fb",
+    "artifacts/llm/development/2026-07-21_run1_daily.csv": "9f6a124e14a821ab91d10d7436d9914963276804d7040c4a29254b6656a27a47",
+    "artifacts/llm/development/2026-07-21_run1_hourly.csv": "f1179d4428d0c230c31ff31a2db10ac18d4c4a0a209c5032d8a2f7344e0eb690",
+    "artifacts/llm/development/2026-07-21_run1_proportions.csv": "dd32fd221db0ae2d59f27a8430cf8783b9e797e9400b24aed4ba1502e51abce6",
+    "artifacts/llm/development/2026-08-04_run1_calibration.csv": "679311cd400cc3b35d8dc61e8429d80bbff02072444bdd36c536f1e1a584861e",
+    "artifacts/llm/development/2026-08-04_run1_daily.csv": "615ff15428a60c5f98821190957ef1713fe2374b26d1ef1aaf2b3a89e514062a",
+    "artifacts/llm/development/2026-08-04_run1_hourly.csv": "223a3c7efc214d77676d74d3341011e67009e276294952815f56f5827608a027",
+    "artifacts/llm/development/2026-08-04_run1_proportions.csv": "4d608fa746ca2e4f4e9b5c5023bdb2283101d4ce7717602d38058d2aa03335bd",
+    "artifacts/llm/development/metrics.csv": "2c826400fb47f3f8e853c8b5e4818de2ebcfd333d9ca401fc1237e6e47b802da",
+    "artifacts/llm/development/reliability.json": "fa957d5aa2aeaaacc34999aaa5803154de40d2e0e6775d17280b6ac8123f8f64"
+  },
+  "journal_bytes": 348962,
+  "journal_sha256": "acf64dd0f340548cec3141f9b01e9cbd7d11f06d1a6f62e455e4d02a5d8b326e"
+}

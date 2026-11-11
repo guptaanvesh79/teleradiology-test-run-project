@@ -1,0 +1,20 @@
+{
+  "model": "quantile_filtered",
+  "forecast_origin": "2026-10-01",
+  "training_start": "2026-06-01 00:00:00",
+  "training_end_exclusive": "2026-10-01 00:00:00",
+  "timezone": "unspecified",
+  "point_estimate": "hourly_median",
+  "daily_point_estimate": "sum_of_hourly_medians",
+  "hourly_interval": "direct_quantiles",
+  "daily_interval": "percentiles of whole-day residuals from three prior weekly forecasts",
+  "daily_bounds_are_not_sums_of_hourly_quantiles": true,
+  "hours": 744,
+  "days": 31,
+  "forecast_total": 43974.7531397196,
+  "selection_sha256": "50dd28921a239bc198f6df342f6ec2b6b161ddcfe89eb5db8c16ce4eac5f0653",
+  "data_sha256": "c6b37d674b26a84d21d3bc0c15b811196d4f40d980ea0939998fbb136bb336f5",
+  "pre_holdout_commit": "a929ab4eb675156753dddcfbccb1f8e9fbf2fc7d",
+  "forecast_csv_sha256": "5d917ff1034879e498ce6d4f643a016899f337ed6f6c4317cf96b41d5aef268d",
+  "daily_csv_sha256": "d48912da4edc8db84bab3f6ddda2f53e1c5838f72bf7adf870a8ddf839b0d6ec"
+}
