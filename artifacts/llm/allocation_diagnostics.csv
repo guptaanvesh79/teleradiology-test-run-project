@@ -1,7 +1,0 @@
-origin,run,daily_volume_absolute_error,oracle_daily_volume_hourly_wape,note
-2026-07-07,1,7832.1333333330,0.1082707971,Oracle uses actual daily totals for diagnosis only; not a valid forecast or additive error decomposition.
-2026-07-21,1,5338.4571428565,0.0849752214,Oracle uses actual daily totals for diagnosis only; not a valid forecast or additive error decomposition.
-2026-08-04,1,5801.1999999999,0.0871856956,Oracle uses actual daily totals for diagnosis only; not a valid forecast or additive error decomposition.
-2026-09-01,1,5295.9384615378,0.0837543477,Oracle uses actual daily totals for diagnosis only; not a valid forecast or additive error decomposition.
-2026-09-01,2,5377.7692307684,0.0837543477,Oracle uses actual daily totals for diagnosis only; not a valid forecast or additive error decomposition.
-2026-09-01,3,5494.4923076918,0.0837543477,Oracle uses actual daily totals for diagnosis only; not a valid forecast or additive error decomposition.
